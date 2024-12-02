@@ -1,0 +1,131 @@
+{%extends "base.html"%}
+
+{%block title%}Area Locatore{%endblock%}
+{%block locatore_active%}active{%endblock%}
+
+{%block main%}
+
+{%if id%} <!-- valuto il falg, se è presente, visualizzo gli annunci, altrimenti visualizzo le richieste -->
+<div class="text-center mb-4">
+  <h2 class="title-outline bg-success p-2" id="tit_richieste">LISTA ANNUNCI</h2>
+</div>
+
+  <ul class="ul_loc" id="ul_loc_ann"> 
+    <li class="li_loc"><a class="a_loc" href="{{url_for('area_locatore')}}">Cronologia Richieste</a></li>
+    <li class="li_loc"><a class="a_loc" href="{{url_for('area_locatore', id=1)}}">Lista Annunci</a></li>
+  </ul>
+
+{%for annuncio in annunci%} <!-- La pagina "area_locatore" viene chiamata di default (e se si clicca su "Lista Richieste") con la visualizzazione delle richieste, se si clicca su "Lista Annunci", chiamiamo invece "area_locatore" con un flag=1 per ottenere la nuova visualizzazione -->
+
+  <article class="row article-border"> 
+    <a class="col-6" href="{{url_for ('single', id=annuncio.id)}}" title="annuncio{{annuncio.id}}"> 
+      <img class="annuncio-img img-fluid w-100" src="{{annuncio.immagine1}}" alt="Annuncio Img"> 
+    </a>
+
+    <div class="container-article col-6 mt-2 mb-4">
+      <div class="sub-container1 mb-5">
+        <h2 class="Titolo title-outline mb-3">{{annuncio.titolo}}</h2>
+        <h6 class="Indirizzo">{{annuncio.indirizzo}}</h6>
+      </div>
+
+      <div class="informazioni sub-container2 row">
+        <p class="Num_loc col-6">Numero locali: <strong>{{annuncio.num_loc}}</strong></p>
+        <h4 class="col-6 text-success">
+            <span class="Prezzo"><strong>{{annuncio.prezzo}} €</strong></span>
+        </h4>
+      </div>
+    </div>
+  </article>
+{%endfor%}
+
+
+{%else%}
+
+<div class="text-center mb-4">
+  <h2 class="title-outline bg-success p-2" id="tit_richieste">CRONOLOGIA RICHIESTE</h2>
+</div>
+
+<ul class="ul_loc"> <!-- come prima-->
+  <li class="li_loc"><a class="a_loc" href="{{url_for('area_locatore')}}">Cronologia Richieste</a></li>
+  <li class="li_loc"><a class="a_loc" href="{{url_for('area_locatore', id=1)}}">Lista Annunci</a></li>
+</ul>
+
+    <div class="row justify-content-center">
+    {%for gruppo in prenotazioni%} <!--insieme di richieste di un singolo annuncio -->
+        {%for p in gruppo%} <!--singola prenotazione-->
+            <!-- 3 cards per riga, se cliccate rimandano al singolo annuncio della prenotazione -->
+            <div class="col-4 mb-3 text-center">
+              <a href="{{ url_for('single', id=p.id_annuncio) }}" class="btn">
+                  <div class="card {% if p.stato == 'A' %}text-white card-accettata{% elif p.stato == 'R' %}text-white bg-danger {% elif p.stato == '?' %}text-white bg-secondary {% endif %}">
+                      <div class="card-header text-white">
+                          {% if p.stato == 'A' %}
+                              Accettata
+                          {% elif p.stato == 'R' %}
+                              Rifiutata
+                          {% elif p.stato == '?' %}
+                              Senza Risposta
+                          {% endif %}
+                      </div>
+                      <div class="card-body">
+                          <h5 class="card-title text-white mb-3">{{p.titolo}}</h5>
+                          <h6 class="card-title text-white"><strong class="text-white info-card text-decoration-underline">Di:</strong>&nbsp;&nbsp;{{p.nickname}}</h6>
+                          <h6 class="card-title text-white"><strong class="text-white info-card text-decoration-underline">In:</strong>&nbsp;{{p.indirizzo}}</h6>
+                          <h6 class="card-title text-white"><strong class="text-white info-card text-decoration-underline info-card">Il:</strong> {{p.data}}</h6>
+                          <h6 class="card-title text-white"><strong class="text-white info-card text-decoration-underline">Slot:</strong> {{p.ora}}</h6>
+          
+                          {% if p.stato == 'R' %}
+                              <div class="mb-3 border-top">
+                                  <div>
+                                    <strong class="form-label text-white">MOTIVO:</strong>
+                                  </div>
+                                  <em>{{p.motivo}}</em>
+                              </div>
+                          {% endif %}
+          
+                          {% if p.stato == '?' %}
+                              <div class="row">
+                                  <!-- ACCETTA -->
+                                  <a href="{{url_for('locatore_accetta', id_annuncio=p.id_annuncio, id_utente=p.id_cliente)}}" class="col-6 btn btn-success text-white text-center border border-dark">ACCETTA</a> 
+                                  <!-- RIFIUTA -->
+                                  <button type="button" class="btn btn-danger border border-dark col-6" data-bs-toggle="modal" data-bs-target="#createModal">RIFIUTA</button>
+                                  
+                                  <!-- Modale rifiuta -->
+                                  <div class="modal fade" id="createModal" tabindex="-1">
+                                      <div class="modal-dialog modal-dialog-centered">
+                                          <div class="modal-content">
+                                              <div class="modal-header">
+                                                  <h1 class="modal-title fs-5 text-dark">RIFIUTA</h1>
+                                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                              </div>
+                                              <form action="{{url_for('locatore_rifiuta', id_annuncio=p.id_annuncio, id_utente=p.id_cliente)}}" method="POST" enctype="multipart/form-data">
+                                                  <div class="modal-body">
+                                                      <div class="mb-3">
+                                                          <label for="Motivo" class="form-label text-dark">Motivo</label>
+                                                          <textarea id="Motivo" class="form-control form_field" required name="motivo" placeholder="Inserisci il motivo del rifiuto"></textarea>
+                                                      </div>
+                                                  </div>
+                                                  <div class="modal-footer">
+                                                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                                                      <button type="submit" class="btn btn-success">Invia</button>
+                                                  </div>
+                                              </form>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          {% endif %}
+                      </div>
+                  </div>
+              </a>
+          </div>
+          
+            {% if loop.index % 3 == 0 %} {# Chiudi la riga dopo ogni terza card #}
+                </div><div class="row justify-content-center">
+                  
+            {% endif %}
+        {%endfor%}
+    {%endfor%}
+  </div>
+            
+{%endif%}
+{%endblock%}

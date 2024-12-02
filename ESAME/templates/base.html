@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+    <head> <!--header-->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap"> <!--foglio di stile google fonts-->>
+        <title>RomaImmobiliare-{%block title%}{%endblock%}</title>
+        <meta name="keywords" content="casa, affitto, html, css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"> <!--link per il bootstrap-->
+        <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}"> <!--link per il file style.css-->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> <!--script js-->
+        
+    </head>
+    <body>
+        <header>
+            <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-success"> <!--navbar fixed-top-->
+                <div class="container-fluid">
+                  <span class="titolo navbar-brand mb-0 h1">RomaImmobiliare</span> 
+                  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                  </button> <!--se lo schermo ha dimensione medium o inferiore compare il bottone di dropdown, altrimenti tutti i campi sono espliciti nella navbar-->
+                  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                      <li class="nav-item">
+                        <a class="nav-link {%block home_active%}{%endblock%}" aria-current="page" href="/">Home</a>
+                      </li>
+                      {% if current_user.is_authenticated %} <!--se l'utente è loggato, vede i vari campi-->
+                      <li class="nav-item">
+                        <a class="nav-link {%block cliente_active%}{%endblock%}" href="{{url_for('area_cliente')}}">Area Cliente</a>
+                      </li>
+                      {% if current_user.locatore=='1' %} <!--se è anche locatore vede "Area Locatore"-->
+                      <li class="nav-item">
+                        <a class="nav-link {%block locatore_active%}{%endblock%}" href="{{url_for('area_locatore')}}">Area Locatore</a>
+                      </li>
+                      {% endif %}
+                      
+                      <li class="nav-item dropdown dropstart">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          {{current_user.nickname}}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                          <li><a class="dropdown-item" href="{{ url_for('logout') }}">Esci</a></li>
+                        </ul>
+                      </li>
+                      {% else %} <!--se non loggato, compare "Iscriviti" e "Accedi"-->
+                      <li class="nav-item">
+                        <a class="nav-link {%block signup_active%}{% endblock %}" aria-current="page"
+                          href="{{ url_for('signup') }}">Iscriviti</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link {%block login_active%}{% endblock %}" href="{{ url_for('login') }}">Accedi</a>
+                      </li>
+                      {% endif %}
+                    </ul>
+                  </div>
+                </div>
+              </nav>
+        </header>
+
+        <div class="container-fluid under-nav">
+          <div class="container-fluid mt-4">
+            {% with messages = get_flashed_messages(with_categories=true) %} <!--messaggi flash per successo/fallimento-->
+                {% if messages %}
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+                      {{ message }}
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+              {% endwith %}
+          </div>
+            <div class="row">
+            <aside class="col-12">
+              {%block aside%}{%endblock%}
+            </aside>
+            <main class="col-12">
+              {%block main%}{%endblock%}
+            </main>
+            </div>  
+            {% if current_user.locatore %}      
+
+            <footer>{%block button%}{%endblock%}</footer> <!--il locatore può aggiungere un annuncio-->
+
+            {% endif %}
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"></script> <!--script js bootstrap-->
+        <!-- Script JS jquery per il carosello di immagini -->
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    </body>
+</html>

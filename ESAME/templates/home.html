@@ -1,0 +1,167 @@
+{%extends "base.html"%}
+
+{%block title%}Home{%endblock%}
+{%block home_active%}active{%endblock%}
+
+{%block aside%} <!-- La pagina "Home" viene chiamata di default (e se si clicca su "Prezzo ↓") per Prezzo decrescente, se si imposta il filtro a "Numero Locali ↑", chiamiamo invece la "Home" con un flag=1 per ottenere l'ordinamento per Numero locali crescente -->
+<div class="container-fluid d-flex justify-content-center">
+  <div class="dropdown">
+      <button class="Ordina btn btn-success dropdown-toggle mb-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Ordina per
+      </button>
+      <ul class="dropdown-menu">
+          <li><a class="Prezzo-filtro text-success" href="/">Prezzo ↓</a></li>
+          <li><a class="Num_Locali text-success" href="{{url_for('home', id=1)}}">Numero locali ↑</a></li>
+      </ul>
+  </div>
+</div>
+{%endblock%}
+
+{%block main%}
+
+  {%for annuncio in annunci%}
+    {% if annuncio.disponibile == '1' or (annuncio.disponibile=='0' and current_user.id==annuncio.id_locatore) %} <!-- l'articolo si vede SE DISPONIBILE O (SE NON DISPONIBILE E L'UTENTE è IL LOCATORE DELL'ANNUNCIO) -->
+    <article class="row article-border"> 
+      <a class="col-6" href="{{url_for ('single', id=annuncio.id)}}" title="annuncio{{annuncio.id}}"> 
+        <img class="annuncio-img img-fluid w-100" src="{{annuncio.immagine1}}" alt="Annuncio Img"> 
+      </a>
+  
+      <div class="container-article col-6 mt-2 mb-4">
+        <div class="sub-container1 mb-5">
+          <h2 class="Titolo title-outline mb-3">{{annuncio.titolo}}</h2>
+          <h6 class="Indirizzo">{{annuncio.indirizzo}}</h6>
+        </div>
+  
+        <div class="informazioni sub-container2 row">
+          <p class="Num_loc col-6">Numero locali: <strong>{{annuncio.num_loc}}</strong></p>
+          <h4 class="col-6 text-success">
+              <span class="Prezzo"><strong>{{annuncio.prezzo}} €</strong></span>
+          </h4>
+        </div>
+      </div>
+    </article>
+    {%endif%}
+  {%endfor%}
+{%endblock%}
+
+
+{%block button%}
+
+{% if current_user.locatore=='1' %} <!-- Solo un locatore può aggiungere un annuncio -->
+<!-- Button per aprire il modale -->
+<div class="d-flex justify-content-end">
+  <button type="button" id="btn-foot" class="btn custom-blue-btn bg-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+    Aggiungi
+  </button>
+</div>
+
+
+<!-- Modale nuovo annuncio -->
+<div class="modal fade" id="createModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Crea un nuovo annuncio</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/annunci/new" method="POST" enctype="multipart/form-data">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="Titolo" class="form-label">Titolo</label>
+            <textarea id="Titolo" class="form-control form_field" required name="titolo" placeholder="Inserisci il titolo dell'annuncio"></textarea>
+          </div>
+          
+          
+          <div class="mb-3">
+            <label for="Indirizzo" class="form-label">Indirizzo</label>
+            <textarea id="Indirizzo" class="form-control form_field" required name="indirizzo" placeholder="Inserisci l'indirizzo dell'abitazione"></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <select class="form-select form-select-sm" aria-label="Small select" name='tipo' required>
+              <option value="" disabled selected>Tipo casa</option>
+              <option value="Indipendente">Indipendente</option>
+              <option value="Appartamento">Appartamento</option>
+              <option value="Loft">Loft</option>
+              <option value="Villa">Villa</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <select class="form-select form-select-sm" aria-label="Small select" name='num_loc' required>
+              <option value="" disabled selected>Numero locali</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5+">5+</option>
+            </select>
+          </div> 
+
+          <div class="mb-3">
+            <label for="Desc" class="form-label">Descrizione</label>
+            <textarea id="Desc" class="form-control form_field" required name="desc" maxlength="250" placeholder="Inserisci una breve descrizione"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="Prezzo">Prezzo</label>
+            <div class="input-group">
+              <input type="number" class="form-control" aria-label="Euro" name='prezzo' placeholder="Inserisci prezzo" required min="0">
+              <span class="input-group-text">€</span>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <p>La casa è arredata?</p>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="arredato" id="flexRadioDefault1" value="Sì" required>
+              <label class="form-check-label" for="flexRadioDefault1">
+                Sì
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="arredato" id="flexRadioDefault2" value="No">
+              <label class="form-check-label" for="flexRadioDefault2">
+                No
+              </label>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="file_img" class="form-label">Immagini (da 1 a 5)</label>
+            <input type="file" class="form-control form_field" id="file_img" name="immagine1" accept=".jpg, .jpeg, .png" required>
+            <input type="file" class="form-control form_field" id="file_img" name="immagine2" accept=".jpg, .jpeg, .png">
+            <input type="file" class="form-control form_field" id="file_img" name="immagine3" accept=".jpg, .jpeg, .png">
+            <input type="file" class="form-control form_field" id="file_img" name="immagine4" accept=".jpg, .jpeg, .png">
+            <input type="file" class="form-control form_field" id="file_img" name="immagine5" accept=".jpg, .jpeg, .png">
+            <!-- Aggiungi più input file per il numero di immagini desiderato -->
+            <small class="form-text text-muted">Sono supportati i seguenti formati: JPG, JPEG, PNG.</small>
+        </div>
+
+          <div class="mb-3">
+            <p>La casa è disponibile?</p>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="disponibile" id="flexRadioDefault3" value="Sì" required>
+              <label class="form-check-label" for="flexRadioDefault3">
+                Sì (visibile a tutti)
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="disponibile" value="No" id="flexRadioDefault4">
+              <label class="form-check-label" for="flexRadioDefault4">
+                No (visibile solo a me)
+              </label>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+          <button type="submit" class="btn btn-success">Crea annuncio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{%endblock%} 

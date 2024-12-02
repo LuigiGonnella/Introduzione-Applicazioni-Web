@@ -1,0 +1,52 @@
+{%extends "base.html"%}
+
+
+{%block title%} Orari e Tipo{%endblock%}
+
+{%block main%}
+        <form action="{{url_for('nuova_pren', id_annuncio=annuncio.id, data=data)}}" method="POST">
+          <div class="modal-body">
+
+            <h3 class="mb-3 font-weight-bold">Data: {{data}}</h3>
+
+            <div class="mb-3"> <!-- Tipo visita-->
+                <select class="form-select form-select-sm" aria-label="Small select" name="tipo" required>
+                  <option value="" disabled selected>Tipo visita</option>
+                  <option value="persona">Di persona</option>
+                  <option value="remoto">Da remoto</option>
+                </select>
+              </div>
+              
+              <div class="mb-3"> <!-- Slot orario con gestione in backend-->
+                <select class="form-select form-select-sm" aria-label="Small select" name="ora" required>
+                  <option value="" disabled selected>Slot orario</option>
+                  {% for ora in orari %}
+                    {%if ora != '0'%}
+                     <option value="{{ora}}">{{ora}}</option>
+                    {%endif%}
+                  {%endfor%}
+                </select>
+              </div>
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success m-2">Invia</button>
+          </div>
+        </form>
+      
+
+{%endblock%}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

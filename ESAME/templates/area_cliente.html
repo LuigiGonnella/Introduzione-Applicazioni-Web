@@ -1,0 +1,53 @@
+{%extends "base.html"%}
+
+{%block title%}Area Cliente{%endblock%}
+{%block cliente_active%}active{%endblock%}
+
+{%block main%}
+
+<div class="text-center mb-4">
+    <h2 class="title-outline bg-success p-2" id="tit_richieste">RICHIESTE DI PRENOTAZIONE</h2>
+  </div>
+  <div class="row justify-content-center">
+        {%for p in prenotazioni%} <!--singola prenotazione-->
+            <!-- 3 cards per riga, se cliccate rimandano al singolo annuncio della prenotazione -->
+            <div class="col-4 mb-3 text-center">
+              <a href="{{ url_for('single', id=p.id_annuncio) }}" class="btn">
+                  <div class="card {% if p.stato == 'A' %}text-white card-accettata{% elif p.stato == 'R' %}text-white bg-danger {% elif p.stato == '?' %}text-white bg-secondary {% endif %}">
+                      <div class="card-header">
+                          {% if p.stato == 'A' %}
+                              Accettata
+                          {% elif p.stato == 'R' %}
+                              Rifiutata
+                          {% elif p.stato == '?' %}
+                              Senza Risposta
+                          {% endif %}
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title text-white mb-3">{{p.titolo}}</h5>
+                          <h6 class="card-title text-white"><strong class="text-white info-card text-decoration-underline">Di:</strong>&nbsp;&nbsp;{{p.nickname}}</h6>
+                          <h6 class="card-title text-white"><strong class="text-white info-card text-decoration-underline">In:</strong>&nbsp;{{p.indirizzo}}</h6>
+                          <h6 class="card-title text-white"><strong class="text-white info-card text-decoration-underline info-card">Il:</strong> {{p.data}}</h6>
+                          <h6 class="card-title text-white"><strong class="text-white info-card text-decoration-underline">Slot:</strong> {{p.ora}}</h6>
+          
+                          {% if p.stato == 'R' %}
+                              <div class="mb-3 border-top">
+                                  <div>
+                                    <strong class="form-label text-white">MOTIVO:</strong>
+                                  </div>
+                                  <em>{{p.motivo}}</em>
+                              </div>
+                          {% endif %}
+          
+                      </div>
+                  </div>
+              </a>
+          </div>
+          
+            {% if loop.index % 3 == 0 %} {# Chiudi la riga dopo ogni terza card #}
+                </div><div class="row justify-content-center">
+                  
+            {% endif %}
+        {%endfor%}
+  </div>
+{%endblock%}

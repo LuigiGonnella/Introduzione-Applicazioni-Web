@@ -1,0 +1,11 @@
+LOCATORI -> 1: mail: locatore1@gmail.com
+	       password: locatore1
+
+	    2: mail: locatore2@gmail.com
+	       password: locatore2	
+
+CLIENTI -> 1: mail: cliente1@gmail.com
+	       password: cliente1
+
+	    2: mail: cliente2@gmail.com
+	       password: cliente2	

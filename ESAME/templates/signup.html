@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Registrati{% endblock %}
+{% block signup_active %}active{% endblock %}
+
+{% block main %}
+<div class="col-5 bg-light p-4 border rounded mx-auto">
+    <form action="/iscriviti" method="POST">
+        <div class="mb-3">
+            <label for="emailInput" class="form-label">Email</label>
+            <input type="email" class="form-control" name="nickname" id="emailInput" required>
+        </div>
+        <div class="mb-3">
+            <label for="passwordInput" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" id="passwordInput" required minlength="5"
+                maxlength="20"> <!-- Minimo controllo sulla password -->
+        </div>
+        <div class="mb-3"> <!-- Gestione di accesso, locatore (e anche cliente di abitazioni non proprie) o cliente (non può diventare locatore) -->
+            <select class="form-select" aria-label="Default select" name="locatore" required>
+              <option value="" disabled selected>Tipo utente</option>
+              <option value="cliente">Cliente</option>
+              <option value="locatore">Locatore</option>
+            </select>
+            <small class="form-text text-muted">Nota Bene: se ti iscrivi come locatore, sarai automaticamente un potenziale cliente delle abitazioni non di tua proprietà. Se invece ti iscrivi come cliente, non potrai diventare locatore in futuro.</small>
+          </div>
+        <button type="submit" class="btn btn-success">Registrati</button>
+    </form>
+</div>
+{% endblock %}

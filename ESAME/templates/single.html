@@ -1,0 +1,245 @@
+{%extends "base.html"%}
+
+
+{%block title%} Annuncio {{annuncio.id}}{%endblock%}
+
+{%block main%}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Inizializza il carosello
+      $('#carosello').carousel({
+        // tolgo lo scorrimento automatico del carosello
+        interval:false
+      });
+
+      // Aggiungi l'evento di clic per visualizzare l'immagine corrente nel carosello
+      const immagineCorrente = document.getElementById('immagineCorrente');
+      const immaginiPreview = document.querySelectorAll('.img_p');
+
+      immaginiPreview.forEach(function (img_p) {
+        img_p.addEventListener('click', function () {
+          const indiceNuovo = this.getAttribute('indice');
+          immagineCorrente.src = "{{annuncio['immagine' + indiceNuovo|string]}}";
+        });
+      });
+    });
+  </script>
+
+
+  <article class="row single_art">
+
+    <div class="col-12 text-center mb-3">
+      <h2 class="title-outline bg-success" id="single_title">{{annuncio.titolo}}</h2>
+    </div>
+
+    <h4>Di: <strong> <a class="nick_init text-success" href=mailto:{{annuncio.nickname}}>{{annuncio.nickname}}</a> </strong></h4>
+
+    <h5>Presso: <strong class="init single_ind"> {{annuncio.indirizzo}}</strong></h5>
+    
+    <!-- Carosello di immagini -->
+    <div class="col-12 mt-2 mb-2 text-center">
+      <div id="carosello" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
+          {% for i in range(1, 6) %}
+            {% if annuncio['immagine' + i|string] != '0' %}
+              <div id="ImmagineCorrente" class="carousel-item {% if i == 1 %}active{% endif %}">
+                <img src="{{annuncio['immagine' + i|string]}}" class="d-block w-100 img-fluid border border-2 border-dark rounded img-single mx-auto mb-3 mt-2 img_p">
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <a class="carousel-control-prev" href="#carosello" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon bg-success border border-2 border-dark rounded" aria-hidden="true"></span>
+        </a>
+        <a class="carousel-control-next" href="#carosello" role="button" data-slide="next">
+          <span class="carousel-control-next-icon bg-success border border-2 border-dark rounded" aria-hidden="true"></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="container col-12">
+      <div class="row">
+          <!-- Primo blocco più grande -->
+          <div class="col-lg-3">
+              <div class="prim_info">
+                  <h3>{{annuncio.prezzo}} €</h3>
+              </div>
+          </div>
+          <!-- Secondo blocco -->
+          <div class="col-lg-3">
+              <div class="sec_info">
+                <p class="Tipo">Tipo: <strong>{{annuncio.tipo}}</strong></p>
+              </div>
+          </div>
+          <!-- Terzo blocco -->
+          <div class="col-lg-3">
+              <div class="sec_info">
+                <p class="Num_loc">Numero locali: <strong>{{annuncio.num_loc}}</strong></p>
+              </div>
+          </div>
+          <!-- Quarto blocco -->
+          <div class="col-lg-3">
+              <div class="sec_info">
+                <p class="Arredato">Arredato: <strong>{{annuncio.arredato}}</strong></p>
+              </div>     
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <h4 class="single_desc">Descrizione:</h4>
+  <p class="col-12 text-justify desc_cont_prim"><span class="description-container">{{annuncio.desc}}</span></p>
+
+  </article>
+  
+
+<!-- Modale prenotazione solo se il ciente è loggato e non coincide con il locatore-->
+  {%if current_user.is_authenticated%}
+    {%if current_user.id != annuncio.id_locatore and flag%}
+
+    <div class="d-flex justify-content-end">
+      <button type="button" id="btn-foot" class="btn custom-blue-btn bg-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+        Prenota
+      </button>
+    </div>
+    
+      <div class="modal fade" id="createModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5">Nuova prenotazione</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{url_for('data_pren', id_annuncio=annuncio.id)}}" method="POST"  enctype="multipart/form-data">
+              <div class="modal-body">
+
+                <div class="mb-3"> <!-- Data visita con gestione correttezza in backend-->
+                  <label for="InputDate">Seleziona una data entro 7 giorni da oggi</label>
+                  <input type="date" id="InputDate" name="data" required>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="submit" class="btn btn-success">Mostra orari</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    {%endif%}  
+
+    {%if current_user.id==annuncio.id_locatore%}
+      <!-- Modale modifica annuncio -->
+      <div class="d-flex justify-content-end">
+        <button type="button" id="btn-foot" class="btn custom-blue-btn bg-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+          Modifica
+        </button>
+      </div>
+
+      <div class="modal fade" id="createModal" tabindex="-1"> 
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5">Modifica annuncio</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{url_for('modifica_annuncio', id_annuncio=annuncio.id)}}" method="POST" enctype="multipart/form-data">
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="Titolo" class="form-label">Titolo</label>
+                  <textarea id="Titolo" class="form-control form_field"  name="titolo" required placeholder="Inserisci il titolo dell'annuncio"></textarea>
+                </div>
+                
+                <div class="mb-3">
+                  <select class="form-select form-select-sm" aria-label="Small select" required name='tipo'>
+                    <option value="" disabled selected>Tipo casa</option>
+                    <option value="Indipendente">Indipendente</option>
+                    <option value="Appartamento">Appartamento</option>
+                    <option value="Loft">Loft</option>
+                    <option value="Villa">Villa</option>
+                  </select>
+                </div>
+                
+                <div class="mb-3">
+                  <select class="form-select form-select-sm" aria-label="Small select" required name='num_loc'>
+                    <option value="" disabled selected>Numero locali</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5+">5+</option>
+                  </select>
+                </div> 
+
+                <div class="mb-3">
+                  <label for="Desc" class="form-label">Descrizione</label>
+                  <textarea id="Desc" class="form-control form_field" name="desc" maxlength="800" required placeholder="Inserisci una breve descrizione"></textarea>
+                </div>
+
+                <div class="mb-3">
+                  <label for="Prezzo">Prezzo</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" aria-label="Euro" name='prezzo' required placeholder="Inserisci prezzo" min="0">
+                    <span class="input-group-text">€</span>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <p>La casa è arredata?</p>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="arredato" id="flexRadioDefault1" required value="Sì">
+                    <label class="form-check-label" for="flexRadioDefault1">
+                      Sì
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="arredato" id="flexRadioDefault2" value="No">
+                    <label class="form-check-label" for="flexRadioDefault2">
+                      No
+                    </label>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="file_img" class="form-label">Immagini (da 1 a 5)</label>
+                  <input type="file" class="form-control form_field" id="file_img" name="immagine1" required accept=".jpg, .jpeg, .png">
+                  <input type="file" class="form-control form_field" id="file_img" name="immagine2" accept=".jpg, .jpeg, .png">
+                  <input type="file" class="form-control form_field" id="file_img" name="immagine3" accept=".jpg, .jpeg, .png">
+                  <input type="file" class="form-control form_field" id="file_img" name="immagine4" accept=".jpg, .jpeg, .png">
+                  <input type="file" class="form-control form_field" id="file_img" name="immagine5" accept=".jpg, .jpeg, .png">
+                  <!-- Aggiungi più input file per il numero di immagini desiderato -->
+                  <small class="form-text text-muted">Sono supportati i seguenti formati: JPG, JPEG, PNG.</small>
+              </div>
+
+                <div class="mb-3">
+                  <p>La casa è disponibile?</p>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="disponibile" id="flexRadioDefault3" required value="Sì">
+                    <label class="form-check-label" for="flexRadioDefault3">
+                      Sì (visibile a tutti)
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="disponibile" value="No" id="flexRadioDefault4">
+                    <label class="form-check-label" for="flexRadioDefault4">
+                      No (visibile solo a me)
+                    </label>
+                  </div>
+                </div>
+
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                <button type="submit" class="btn btn-success">Modifica</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {%endif%}
+
+  {%endif%}
+
+{%endblock%}
+
